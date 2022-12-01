@@ -17,7 +17,7 @@ Servidor/Serviços Principal:
 - Portainer*
 - SonarQube*
 
-* Pode realizar o procedimento sem essas ferramentas. O Portainer é para gerenciar mais fácil o Docker localmente e até os remotos em um único local. O SonarQube é um analisador de vulnerabilidade que inicialmente pode não ser utilizado, mas a sua função em um contexto geral é muito importante.
+***** Pode realizar o procedimento sem essas ferramentas. O Portainer é para gerenciar mais fácil o Docker localmente e até os remotos em um único local. O SonarQube é um analisador de vulnerabilidade que inicialmente pode não ser utilizado, mas a sua função em um contexto geral é muito importante.
 
 
 
