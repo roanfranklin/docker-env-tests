@@ -1,0 +1,65 @@
+version: "3"
+
+services:
+
+  sonarqube:
+    image: sonarqube:community
+    hostname: sonarqube
+    container_name: sonarqube
+    restart: always
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://sonarqube-db:5432/dbsonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: SENHAsonar
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sonarqube.rule=Host(`sonar.domain.com`)"
+      - "traefik.http.routers.sonarqube.entrypoints=https"
+      - "traefik.http.services.sonarqube.loadbalancer.server.port=9000"
+      - "traefik.http.routers.sonarqube.service=sonarqube"
+      - "traefik.http.routers.sonarqube.tls.certresolver=admin"
+    extra_hosts:
+      - "registry.domain.com git.domain.com:192.168.0.253"
+#    ports:
+#      - "9001:9000"
+#      - "9092:9092"        
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    depends_on:
+      - sonarqube-db
+    networks:
+      - mynet
+
+
+  sonarqube-db:
+    image: postgres:12
+    hostname: postgresql
+    container_name: sonarqube-db
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: SENHAsonar
+      POSTGRES_DB: dbsonar
+    volumes:
+      - sonarqube_db:/var/lib/postgresql
+      - sonarqube_db_data:/var/lib/postgresql/data
+    networks:
+      - mynet
+
+
+networks:
+    mynet:
+      external: true
+
+volumes:
+    sonarqube_data:
+      external: true
+    sonarqube_extensions:
+      external: true
+    sonarqube_logs:
+      external: true
+    sonarqube_db:
+      external: true
+    sonarqube_db_data:
+      external: true

@@ -1,0 +1,47 @@
+version: "3"
+
+services:
+  gogs:
+    image: gogs/gogs
+    restart: always
+    container_name: gogs
+    volumes:
+      - gogs_data:/data
+      - gogs_backup:/backup
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gogs.rule=Host(`git.domain.com`)"
+      - "traefik.http.routers.gogs.entrypoints=https"
+      - "traefik.http.services.gogs.loadbalancer.server.port=3000"
+      - "traefik.http.routers.gogs.service=gogs"
+      - "traefik.http.routers.gogs.tls.certresolver=admin"
+    ports:
+      - "22:22"
+    depends_on:
+      - gogs-db
+    networks:
+      - mynet
+
+  gogs-db:
+    image: mariadb
+    container_name: gogs-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: SENHAdoUSUARIOroot
+    volumes:
+       - gogs_db:/var/lib/mysql
+    networks:
+      - mynet
+
+
+networks:
+    mynet:
+      external: true
+
+volumes:
+    gogs_data:
+      external: true
+    gogs_backup:
+      external: true
+    gogs_db:
+      external: true

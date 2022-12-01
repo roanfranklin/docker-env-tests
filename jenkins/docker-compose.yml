@@ -1,0 +1,42 @@
+version: '3.7'
+
+services:
+  jenkins:
+    #image: jenkins/jenkins:lts
+    image: registry.domain.com/jenkins:docker
+    privileged: true
+    user: root
+    restart: always
+    # ports:
+    #   - 8080:8080
+    #   # - 8443:8443
+    extra_hosts:
+      - "registry.domain.com git.domain.com:192.168.0.253"
+    container_name: jenkins
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jenkins.rule=Host(`jenkins.domain.com`)"
+      - "traefik.http.routers.jenkins.entrypoints.https=true"
+      - "traefik.http.routers.jenkins.tls.certresolver=admin"
+      - "traefik.http.routers.jenkins.service=jenkins"
+      - "traefik.http.services.jenkins.loadbalancer.server.port=8080"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - mynet
+
+networks:
+    mynet:
+      external: true
+
+volumes:
+  jenkins_home:
+    external: true
+
+# EXECUTAR os comandos abaixo:
+#
+# docker build -t registry.domain.com/jenkins:docker .
+#
+# docker exec jenkins cat /var/jenkins_home/secrets/initialAdminPassword
+#

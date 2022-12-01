@@ -1,0 +1,32 @@
+version: "3"
+
+services:
+
+  portainer:
+    image: portainer/portainer-ce:2.9.0-alpine
+    container_name: portainer
+    restart: always
+    command: -H unix:///var/run/docker.sock
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.domain.com`)"
+      - "traefik.http.routers.portainer.entrypoints=https"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+      - "traefik.http.routers.portainer.service=portainer"
+      - "traefik.http.routers.portainer.tls.certresolver=admin"
+    # ports:
+    #   - 9000:9000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    networks:
+      - mynet
+
+
+networks:
+    mynet:
+      external: true
+
+volumes:
+  portainer_data:
+    external: true

@@ -1,0 +1,42 @@
+version: "3"
+
+services:
+
+  nexus:
+    image: sonatype/nexus3
+    container_name: nexus
+    restart: always
+    hostname: registry.domain.com
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nexus.rule=Host(`nexus.domain.com`)"
+      - "traefik.http.routers.nexus.entrypoints.https=true"
+      - "traefik.http.routers.nexus.tls.certresolver=admin"
+      - "traefik.http.services.nexus.loadbalancer.server.port=8081"
+      - "traefik.http.routers.nexus.service=nexus"
+
+      - "traefik.http.routers.registry.rule=Host(`registry.domain.com`)"
+      - "traefik.http.routers.registry.entrypoints.https=true"
+      - "traefik.http.routers.registry.tls.certresolver=admin"
+      - "traefik.http.services.registry.loadbalancer.server.port=8082"
+      - "traefik.http.routers.registry.service=registry"
+    volumes:
+      - nexus_data:/nexus-data
+    # ports:
+    #   - 8081:8081
+    #   - 8082:8082
+    networks:
+      - mynet
+
+
+networks:
+    mynet:
+      external: true
+
+volumes:
+  nexus_data:
+    external: true
+
+# Em caso de dar algo errado nesse container, execute o/os comandos abaixo:
+# chown 200:200 nexus_data
+# docker unshered chown 200:200 nexus_data

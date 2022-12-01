@@ -1,0 +1,52 @@
+version: "3"
+
+services:
+
+  traefik:
+    image: traefik:v2.9
+    container_name: traefik
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      # Redirect all HTTP traffic to HTTPS
+      - "traefik.http.routers.to-https.rule=HostRegexp(`{host:.+}`)"
+      - "traefik.http.routers.to-https.entrypoints=http"
+      - "traefik.http.routers.to-https.middlewares=to-https"
+      # Acesso ao dashboard do Traefik
+      - "traefik.http.routers.traefik.rule=Host(`traefik.domain.com`)"
+      - "traefik.http.routers.traefik.entrypoints=https"
+      - "traefik.http.routers.traefik.middlewares=auth"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.tls.certresolver=admin"
+      # Auto redirecionamento da 80 ( http ) para 443 ( https )
+      - "traefik.http.middlewares.to-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.to-https.redirectscheme.permanent=true"
+      # Middlewares Authentication
+      - "traefik.http.middlewares.auth.basicauth.users=admin:$$2y$$05$$SSGtXlQYXZ2U1e/D4PLBf.gC.WDLmPa4VIRFSget0X0LH17kpjHue"
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - traefik_letsencrypt:/letsencrypt
+      - traefik_certs:/certs
+      #- ./data/traefik.yml:/traefik.yml:ro
+      #- ./data/config.yml:/config.yml:ro
+      - traefik_logs:/var/log/traefik
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - mynet
+
+
+networks:
+    mynet:
+      external: true
+
+volumes:
+  traefik_letsencrypt:
+    external: true
+  traefik_certs:
+    external: true
+  traefik_logs:
+    external: true
+
